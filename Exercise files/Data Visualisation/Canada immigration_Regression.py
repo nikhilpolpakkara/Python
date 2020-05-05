@@ -85,7 +85,8 @@ df_countries = df_can.loc[['Denmark', 'Norway', 'Sweden'], years].transpose()
 df_total = pd.DataFrame(df_countries.sum(axis=1))
 df_total.reset_index(inplace=True)
 df_total.columns = ['year', 'total']
-df_total['year'] = df_total['year'].astype(int)
+df_total['year'] = df_total['year'].map(int)
+#df_total['year'] = df_total['year'].astype(int)
 
 plt.figure(figsize=(15, 10))
 
