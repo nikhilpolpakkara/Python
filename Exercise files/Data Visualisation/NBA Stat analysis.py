@@ -34,10 +34,13 @@ for i in range(1,5):     #len(player_index)+1
 df_nba_player.columns = df_nba_player.columns.str.strip()
 
 df = pd.DataFrame([[1, 2], [3, 4]], columns=list('AB'))
-df2 = pd.DataFrame([[5, 6], [7, 8]], columns=list('AB'))
+df2 = pd.DataFrame([[5, 6], [7, 8]], columns=list('AB'))    
 df.append(df2)
 
 condition = df_nba_player.loc[lis,'G'] > 100
 df_player_100_plus_G = df_nba_player[condition]
 df_nba_player.set_index('PlayerName',inplace=True)
 df_nba_player.reset_index()
+df_nba.loc['Michael Jordan', ['SeasonStart','PTS']]
+df_nba.index
+df_nba.index = df_nba.index.str.strip('*')
