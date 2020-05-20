@@ -35,7 +35,7 @@ for i in range(0,len(lst)):
     
 #%%
 dataset = []
-for i in range(1000):
+for i in range(147194):      #147192
     dataset.append(json.loads(f.readline()))
 
 #%%
@@ -74,3 +74,33 @@ for d in dataset:
     Prod_popular[d['asin']] += 1
 sort_list = [(Prod_popular[p],p) for p in Prod_popular]
 sort_list = sorted(sort_list, key=lambda x: x[0], reverse=True)
+
+#%%
+#length of dictionary in f
+i = 0
+for line in f:
+    i += 1
+#%%
+#Extract time
+for d in dataset:
+    d['Year'] = int(d['reviewTime'][-4:])
+
+#%%
+#For data prior to 2019 filtering
+
+dataset_2013_above = [d for d in dataset if d['Year']>2013]
+#%%
+# Discarding inactive users
+from collections import defaultdict
+
+nreviewsperuser = defaultdict(int)
+
+for d in dataset_2013_above:
+    nreviewsperuser[d['reviewerID']] += 1 
+
+dataset_2013_above = [d for d in dataset_2013_above if nreviewsperuser[d['reviewerID']]>2]
+
+#%%
+#discarding any review less than 10 words
+dataset_2013_above = [d for d in dataset_2013_above if 'reviewText' in d]
+dataset_2013_above = [d for d in dataset_2013_above if len(d['reviewText'].split())>=10]
