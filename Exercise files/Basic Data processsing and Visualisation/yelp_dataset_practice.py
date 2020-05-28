@@ -19,7 +19,28 @@ for i in range(100):
         dataset.append(json.loads(f.readline()))
     except:
         continue
+#%%
+import time
+import calendar
 
+date_list = []
+for x in dataset:
+    date = time.strptime(x['yelping_since'], '%Y-%m-%d %H:%M:%S')
+    date_list.append(date)
+
+date_list_timegm = []    
+for x in date_list:
+    date = calendar.timegm(x)
+    date_list_timegm.append(date)
+
+date_list_sorted = []
+for x in date_list_timegm:
+    date = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(x))
+    date_list_sorted.append(date)
+
+data_dict = {}
+for x in dataset:
+    date_list[x['name']].append(time.strptime(x['yelping_since'], '%Y-%m-%d %H:%M:%S'))
 #%%
 #how to make a dictionary with list
 funny_name = defaultdict(list)
