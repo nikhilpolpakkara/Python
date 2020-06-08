@@ -105,7 +105,7 @@ if __name__ == "__main__":
         #creating an empty list of important signals
         impSignals = ['cps_n_engine', 'egr_b_operate_valve', 
                       'egr_T_exhaust_temperature', 'egr_T_oil_temperature',
-                      'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
+                     # 'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
                       'egr_P_exhaustp','egr_P_intakep_min',#'egr_P_intakep'
                       ]
         df = mdf.to_dataframe(
