@@ -23,7 +23,7 @@ def graph(x):
     plt.xlabel('time(s)')
     plt.ylabel('mg')
     plt.title(x.name+" Modal")
-    return graph_
+    #return graph_
 
 def readModal(folder, baseName):
     filePath = os.path.join(folder, baseName)
@@ -204,12 +204,15 @@ if __name__ == "__main__":
         df.set_index('Sl.no',inplace=True)
 #        index = pd.Index(range(0,len(df['egr_b_operate_valve'])+1))
 #        df = pd.DataFrame(df,index=index)
-        
+
+#%%        
         graph(df['NOx'])
-        plt.figure()
+        #plt.figure()
         graph(df['CO'])
-        plt.figure()
+        #plt.figure()
         graph(df['THC'])
+        
+        df['NOx'].plot()
         
         """
         dfModal['NOx'].plot(kind='line', figsize=(10, 6), rot=90) 
