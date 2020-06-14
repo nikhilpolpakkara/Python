@@ -35,7 +35,7 @@ for i in range(0,len(lst)):
     
 #%%
 dataset = []
-for i in range(147194):      #147192
+for i in range(100):      #147192
     dataset.append(json.loads(f.readline()))
 
 #%%
