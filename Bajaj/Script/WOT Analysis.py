@@ -96,17 +96,20 @@ for datFile in datFiles:
     
     excelFilePath = os.path.join(graphFolderPath, excelFile)
     # df.to_excel(excelFilePath, columns = columnOrderExcel)
-    df_Exh_temp = Averaging_df(df,'egr_T_exhaust_temperature')
-    df_Oil_temp = Averaging_df(df,'egr_T_oil_temperature')    
-    df_Exh_press = Averaging_df(df,'egr_P_exhaustp') 
+    df_Exh_temp = round(Averaging_df(df,'egr_T_exhaust_temperature'),2)
+    df_Oil_temp = round(Averaging_df(df,'egr_T_oil_temperature'),2)    
+    df_Exh_press = round(Averaging_df(df,'egr_P_exhaustp'),2) 
 
-    df_Average = df_Exh_temp.join((df_Oil_temp['egr_T_oil_temperature'],df_Exh_press['egr_P_exhaustp']))
-   
     
-    df_Average['Vehicle speed (km/h)'] = df_KS['v_act_kmh'].values
-    df_Average['Power (kW)'] = df_KS['Power_vehicle'].values
-    df_Average['Fuel flow (kg/h)'] = df_KS['act_fr_flow'].values
-    df_Average['Tractive Force (Nm)'] = df_KS['f_vehicle_engine'].values
+    df_Average = df_Exh_temp.join((df_Oil_temp['egr_T_oil_temperature'],df_Exh_press['egr_P_exhaustp']))
+    df_Average = df_Average.rename(columns={'egr_T_exhaust_temperature':'Exhaust temp(°C)',
+                               'egr_T_oil_temperature':'Oil temp(°C)',
+                               'egr_P_exhaustp':'Exh pressure(mbar)'})
+    
+    df_Average['Vehicle speed (km/h)'] = df_KS['v_act_kmh'].values.round(2)
+    df_Average['Power (kW)'] = df_KS['Power_vehicle'].values.round(2)
+    df_Average['Fuel flow (kg/h)'] = df_KS['act_fr_flow'].values.round(2)
+    df_Average['Tractive Force (Nm)'] = df_KS['f_vehicle_engine'].values.round(2)
     
     df_Average.to_excel(excelFilePath)
     
@@ -120,6 +123,8 @@ for datFile in datFiles:
     plt.title('Exhaust Back Pressure')
     plt.show()
     
+    print('Power @ 3200RPM :',df_Average['Power (kW)'][0])
+    print('Power @ 1800RPM :',df_Average['Power (kW)'][8])
     Power = graph_(df_Average,'Power (kW)')
     plt.grid(linestyle='dotted')
     plt.xlabel('RPM')
@@ -127,6 +132,8 @@ for datFile in datFiles:
     plt.title('Power (kW)')
     plt.show()
     
+    print('Power @ 3200RPM :',df_Average['Fuel flow (kg/h)'][0])
+    print('Power @ 1800RPM :',df_Average['Fuel flow (kg/h)'][8])
     Fuel_flow = graph_(df_Average,'Fuel flow (kg/h)')
     plt.grid(linestyle='dotted')
     plt.xlabel('RPM')
@@ -134,10 +141,13 @@ for datFile in datFiles:
     plt.title('Fuel flow')
     plt.show()
 
-    Fuel_flow = graph_(df_Average,'egr_T_exhaust_temperature')
+    Exhaust_temperature = graph_(df_Average,'egr_T_exhaust_temperature')
     plt.grid(linestyle='dotted')
     plt.xlabel('RPM')
     plt.ylabel('kg/h')
     plt.title('Fuel flow')
     plt.show()
+    
+    print('Pressure @ 3200RPM :',df_Average['egr_P_exhaustp'][1])
+    
     
