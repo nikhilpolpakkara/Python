@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu May 21 13:42:03 2020
+Created on Mon Jun 15 10:52:29 2020
 
 @author: nikhilp
 """
+
 from asammdf import MDF
 import easygui
 import pandas as pd
@@ -15,6 +16,20 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import binned_statistic_2d 
 import openpyxl
+
+def Averaging_df(x,y):
+    EGR_Flow_perc = [0,2,4,6,8,10,12,14,16,18,20]
+    sl_no = [1,2,3,4,5,6,7,8,9,10,11]
+    mean_ = []
+    for i in EGR_Flow_perc:
+        df_i = x[(x['egr_pct_req_flow'] > i-0.5) & (x['egr_pct_req_flow'] < i+0.5)]
+        a = df_i[y].mean()
+        mean_.append(a)
+    mean_dict = {'sl.no':sl_no,'egr_pct_req_flow': EGR_Flow_perc,y:mean_}
+    df_mean_ = pd.DataFrame(mean_dict)
+    df_mean_ = df_mean_.set_index(df_mean_['sl.no'])
+    # print(df_mean_)
+    return df_mean_[y]
 
 #Reading INCA data
 
@@ -46,13 +61,15 @@ for datFile in datFiles:
         if not(("CCP" in signal) or ("_sword" in signal) or "$" in signal):
             measuredSignals.append(signal)
     #creating an empty list of important signals
-    impSignals = ['cps_n_engine', 'egr_b_operate_valve', 
+    impSignals = ['cps_n_engine','egr_pct_req_flow','egr_mm_Target_Pos','egr_mm_Current_Pos',
                       'egr_T_exhaust_temperature', 'egr_T_oil_temperature',
-                      #'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
-                      'egr_P_exhaustp','egr_P_intakep_min','egr_P_intakep']
+                      'egr_kghr_egr_flow_req','egr_kghr_egr_flow_th','egr_kghr_intake_flow_act',
+                      'egr_P_deltap_cycle','egr_P_deltap_inst',
+                      'egr_P_exhaustp']
+                      #,'egr_P_intakep_min','egr_P_intakep']
     df = mdf.to_dataframe(
             channels=impSignals,
-            raster= 'egr_b_operate_valve',
+            raster= 'egr_pct_req_flow',
             time_from_zero=True,
             empty_channels="zeros",
 #            keep_arrays=False,
@@ -75,18 +92,12 @@ for datFile in datFiles:
     excelFile = baseName + '_data.xlsx'
     excelFilePath = os.path.join(graphFolderPath, excelFile)
     
-    Time_EGR_open = df['egr_b_operate_valve'].sum()
-    # print("Time EGR open =",Time_EGR_open)
-    EGR_open_perc = (Time_EGR_open/(df['egr_b_operate_valve'].count()))*100
-    print("EGR opening percentage in IDC for ",baseName+'-',round(EGR_open_perc,1),'%')    
     
-    df.to_excel(excelFilePath, columns = columnOrderExcel)
-    
-    
-    wb = openpyxl.load_workbook(excelFilePath)
-    print(wb.sheetnames)
-    wb_1 = wb["Sheet1"]
-    wb_1['K1']= 'EGR opening %'
-    wb_1['L1']= EGR_open_perc
-    
-    wb.save(excelFilePath)
+    df_Avg = pd.DataFrame()
+
+    for i in impSignals:
+        a = Averaging_df(df,i)
+        # print(a)
+        df_Avg[i] = a
+    df_Avg['Error in lift'] = df['egr_mm_Target_Pos']-df['egr_mm_Current_Pos']
+    df_Avg.to_excel(excelFilePath, columns = columnOrderExcel)

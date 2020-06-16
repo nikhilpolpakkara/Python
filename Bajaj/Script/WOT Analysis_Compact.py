@@ -16,40 +16,45 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import binned_statistic_2d 
 
+
+
 datFiles = easygui.fileopenbox(msg='Select dat files', default='*.dat', multiple = True)
 #get the folderpath of dat file
 folderPath = os.path.dirname(datFiles[0])
 
 def Averaging_df(x,y):
-    RPM = [3400,3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
+    # RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
+    RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
     mean_ = []
     for i in RPM:
         df_i = x[(x['cps_n_engine'] > i-50) & (x['cps_n_engine'] < i+50)]
         a = df_i[y].mean()
         mean_.append(a)
-    mean_dict = {'Engine Speed':RPM,y:mean_}
+    mean_dict = {'Engine speed (RPM)':RPM,y:mean_}
     df_mean_ = pd.DataFrame(mean_dict)
-    df_mean_.set_index(df_mean_['Engine Speed'])
+    df_mean_.set_index(df_mean_['Engine speed (RPM)'])
     # print(df_mean_)
     return df_mean_[y]
 
 
 
 def graph_(X,Y):
-    RPM = [3400,3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
-    graph_ = X.plot(x = 'Engine Speed', y = Y,figsize=(10, 6), rot=90,xticks= RPM,kind = 'line',grid=True)
+    RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
+    # RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
+    graph_ = X.plot(x ='INCA engine speed (RPM)' , y = Y,figsize=(10, 6),
+                    rot=90,xticks= RPM,kind = 'line',grid=True,marker='o')
     return graph_
 
 #def read_df():
 # dfs = {}
 for datFile in datFiles:
     baseName = os.path.basename(datFile)[:-4]
-    KS_filename = baseName + '.xlsx'
+    KS_filename = baseName + '_KS.xlsx'
     KS_filepath = os.path.join(folderPath, KS_filename)
     xlsx_KS_file = pd.ExcelFile(KS_filepath)
     df_KS = xlsx_KS_file.parse('Sheet1')
-    df_KS.drop(([0,1]),axis=0,inplace=True)
-    sl_no = list(range(0,12))
+    df_KS.drop(([0]),axis=0,inplace=True)
+    sl_no = list(range(1,12))
     df_KS['sl_no'] = sl_no
     df_KS.set_index(df_KS['sl_no'])
     
@@ -95,18 +100,19 @@ for datFile in datFiles:
         os.mkdir(graphFolderPath)
     
     excelFilePath = os.path.join(graphFolderPath, excelFile)
-    # df.to_excel(excelFilePath, columns = columnOrderExcel)
+
+    df_Eng_spd = round(Averaging_df(df,'cps_n_engine'),0)
     df_Exh_temp = round(Averaging_df(df,'egr_T_exhaust_temperature'),2)
     df_Oil_temp = round(Averaging_df(df,'egr_T_oil_temperature'),2)    
     df_Exh_press = round(Averaging_df(df,'egr_P_exhaustp'),2) 
     df_Intake_press = round(Averaging_df(df,'egr_P_intakep'),2)
     
-    df_Average = df_Exh_temp.join((df_Oil_temp['egr_T_oil_temperature'],df_Exh_press['egr_P_exhaustp']))
-    df_Average = df_Average.rename(columns={'egr_T_exhaust_temperature':'Exhaust temp(°C)',
-                               'egr_T_oil_temperature':'Oil temp(°C)',
-                               'egr_P_exhaustp':'Exh pressure(mbar)'})
-    # df_Average['Intake Pressure (mbar)'] = df_Intake_press[0]
-    
+    df_Average = pd.DataFrame()
+    df_Average['INCA engine speed (RPM)'] = df_Eng_spd
+    df_Average['Oil temp(°C)'] = df_Oil_temp
+    df_Average['Exhaust temp(°C)'] = df_Exh_temp
+    df_Average['Exh pressure(mbar)'] = df_Exh_press
+    df_Average['Intake pressure(mbar)'] = df_Intake_press
     df_Average['Vehicle speed (km/h)'] = df_KS['v_act_kmh'].values.round(2)
     df_Average['Power (kW)'] = df_KS['Power_vehicle'].values.round(2)
     df_Average['Fuel flow (kg/h)'] = df_KS['act_fr_flow'].values.round(2)
@@ -114,24 +120,25 @@ for datFile in datFiles:
     
     df_Average.to_excel(excelFilePath)
     
-    df_graph = df_Average
-    df_graph.set_index(df_graph['Engine Speed'])    
+    # df_graph = df_Average
+    # df_graph.set_index(df_graph['Engine speed (RPM)'])    
     
-    # Intake_pressure = graph_(df_Average,'egr_P_intakep')
-    # plt.grid(linestyle='dotted')
-    # plt.xlabel('RPM')
-    # plt.ylabel('mbar')
-    # plt.title('Intake Pressure')
-    # plt.show()
-    # plt.savefig(os.path.join(graphFolderPath, baseName + "__binnedTime.png"), bbox_inches='tight')
+       
+    Intake_pressure = graph_(df_Average,'Intake pressure(mbar)')
+    plt.grid(linestyle='dotted')
+    plt.xlabel('RPM')
+    plt.ylabel('mbar')
+    plt.title('Intake Pressure')
+    plt.show()
+    plt.savefig(os.path.join(graphFolderPath, baseName + "_Intake pressure.png"), bbox_inches='tight')
     
-    Exhaust_pressure = graph_(df_Average,'egr_P_exhaustp')
+    Exhaust_pressure = graph_(df_Average,'Exh pressure(mbar)')
     plt.grid(linestyle='dotted')
     plt.xlabel('RPM')
     plt.ylabel('mbar')
     plt.title('Exhaust Back Pressure')
     plt.show()
-    plt.savefig(os.path.join(graphFolderPath, baseName + "__Exh_press.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(graphFolderPath, baseName + "_Exh_press.png"), bbox_inches='tight')
     
     print('Power @ 3200RPM :',df_Average['Power (kW)'][0])
     print('Power @ 1800RPM :',df_Average['Power (kW)'][8])
@@ -141,7 +148,7 @@ for datFile in datFiles:
     plt.ylabel('kW')
     plt.title('Power (kW)')
     plt.show()
-    plt.savefig(os.path.join(graphFolderPath, baseName + "__Power.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(graphFolderPath, baseName + "_Power.png"), bbox_inches='tight')
     
     print('Power @ 3200RPM :',df_Average['Fuel flow (kg/h)'][0])
     print('Power @ 1800RPM :',df_Average['Fuel flow (kg/h)'][8])
@@ -151,15 +158,14 @@ for datFile in datFiles:
     plt.ylabel('kg/h')
     plt.title('Fuel flow')
     plt.show()
-    plt.savefig(os.path.join(graphFolderPath, baseName + "__Fuel flow.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(graphFolderPath, baseName + "_Fuel flow.png"), bbox_inches='tight')
     
-    Exhaust_temperature = graph_(df_Average,'egr_T_exhaust_temperature')
+    Exhaust_temperature = graph_(df_Average,'Exhaust temp(°C)')
     plt.grid(linestyle='dotted')
     plt.xlabel('RPM')
     plt.ylabel('kg/h')
     plt.title('Fuel flow')
     plt.show()
-    
-    #print('Pressure @ 3200RPM :',df_Average['egr_P_exhaustp'][1])
-    
+    plt.savefig(os.path.join(graphFolderPath, baseName + "__Exhaust temp.png"), bbox_inches='tight')
+    # print('Pressure @ 3200RPM :',df_Average['egr_P_exhaustp'][1])
     
