@@ -84,7 +84,7 @@ if __name__ == "__main__":
     for datFile in datFiles:
         #get the basename of the file 
         baseName = os.path.basename(datFile)[:-4]
-        modalFileName = baseName + ".xls"
+        modalFileName = baseName + "_MODAL.xls"
         modalFilePath = os.path.join(folderPath, modalFileName)
         #create directory to store all the plots
         graphFolderPath = os.path.join(folderPath, baseName)
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         impSignals = ['cps_n_engine', 'egr_b_operate_valve', 
                       'egr_T_exhaust_temperature', 'egr_T_oil_temperature',
                      # 'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
-                      'egr_P_exhaustp','egr_P_intakep_min',#'egr_P_intakep'
+                      'egr_P_exhaustp','egr_P_intakep_min','egr_pct_req_flow',#'egr_P_intakep'
                       ]
         df = mdf.to_dataframe(
                 channels=impSignals,
@@ -204,22 +204,3 @@ if __name__ == "__main__":
         df.set_index('Sl.no',inplace=True)
 #        index = pd.Index(range(0,len(df['egr_b_operate_valve'])+1))
 #        df = pd.DataFrame(df,index=index)
-
-#%%        
-        graph(df['NOx'])
-        #plt.figure()
-        graph(df['CO'])
-        #plt.figure()
-        graph(df['THC'])
-        
-        df['NOx'].plot()
-        
-        """
-        dfModal['NOx'].plot(kind='line', figsize=(10, 6), rot=90) 
-
-        plt.xlabel('time(s)')
-        plt.ylabel('NOx(mg)')
-        plt.title('NOx Modal')
-        
-        plt.savefig(os.path.join(graphFolderPath, baseName + "__binnedTime.png"), bbox_inches='tight')
-        """

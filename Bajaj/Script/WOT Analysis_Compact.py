@@ -43,10 +43,12 @@ def graph_(X,Y):
     # RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
     graph_ = X.plot(x ='INCA engine speed (RPM)' , y = Y,figsize=(10, 6),
                     rot=90,xticks= RPM,kind = 'line',grid=True,marker='o')
+    for x,y in zip(RPM,X[Y]):
+        graph_.annotate(str(y),xy=(x,y))
     return graph_
 
 #def read_df():
-# dfs = {}
+dfs = {}
 for datFile in datFiles:
     baseName = os.path.basename(datFile)[:-4]
     KS_filename = baseName + '_KS.xlsx'
@@ -117,7 +119,8 @@ for datFile in datFiles:
     df_Average['Power (kW)'] = df_KS['Power_vehicle'].values.round(2)
     df_Average['Fuel flow (kg/h)'] = df_KS['act_fr_flow'].values.round(2)
     df_Average['Tractive Force (Nm)'] = df_KS['f_vehicle_engine'].values.round(2)
-    
+    dfs[baseName] = df_Average
+
     df_Average.to_excel(excelFilePath)
     
     # df_graph = df_Average
@@ -168,4 +171,27 @@ for datFile in datFiles:
     plt.show()
     plt.savefig(os.path.join(graphFolderPath, baseName + "__Exhaust temp.png"), bbox_inches='tight')
     # print('Pressure @ 3200RPM :',df_Average['egr_P_exhaustp'][1])
-    
+"""
+
+
+def power_():
+    RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
+    # RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
+    graph_ = df_Average.plot(x ='INCA engine speed (RPM)' , y ='Power (kW)' ,figsize=(10, 6),
+                    rot=90,xticks= RPM,kind = 'line',grid=True,marker='o')
+    for x,y in zip(RPM,df_Average['Power (kW)']):
+        graph_.annotate(str(y),xy=(x,y))
+    plt.grid(linestyle='dotted')
+    plt.xlabel('RPM')
+    plt.ylabel('mbar')
+    plt.title('Power')
+
+for df in dfs:
+    print(dfs[df]['Power (kW)'])
+    # ax1 =
+    dfs[df].plot(x ='INCA engine speed (RPM)' , y ='Power (kW)' ,figsize=(10, 6),
+                    rot=90,xticks= RPM,kind = 'line',grid=True,marker='o')
+for df in dfs:
+    dfs[df].(x='INCA engine speed (RPM)' , y ='Power (kW)',label=basename)
+    plt.plot()
+"""

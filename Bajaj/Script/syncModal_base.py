@@ -166,8 +166,10 @@ if __name__ == "__main__":
         #excelFilePath
         excelFilePath = os.path.join(graphFolderPath, excelFile)
         df.to_excel(excelFilePath, columns = columnOrderExcel)
-#        dfs[baseName] = df
-#    for baseName in dfs.keys():
-#        df = dfs[baseName]
-#        print(sum(df.NOx)*3)
-#        plt.plot(range(len(df)), df.NOx, label = baseName)
+        dfs[baseName] = df
+        for baseName in dfs.keys():
+            df = dfs[baseName]
+            print(sum(df.NOx)/3.93)
+            plt.plot(range(len(df)), df.NOx, label = baseName)
+
+
