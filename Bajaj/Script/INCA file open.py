@@ -48,8 +48,8 @@ for datFile in datFiles:
     #creating an empty list of important signals
     impSignals = ['cps_n_engine', 'egr_b_operate_valve', 
                       'egr_T_exhaust_temperature', 'egr_T_oil_temperature',
-                      #'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
-                      'egr_P_exhaustp','egr_P_intakep_min','egr_P_intakep']
+                      'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
+                      'egr_P_exhaustp']#,'egr_P_intakep_min','egr_P_intakep']
     df = mdf.to_dataframe(
             channels=impSignals,
             raster= 'egr_b_operate_valve',
@@ -83,10 +83,10 @@ for datFile in datFiles:
     df.to_excel(excelFilePath, columns = columnOrderExcel)
     
     
-    wb = openpyxl.load_workbook(excelFilePath)
-    print(wb.sheetnames)
-    wb_1 = wb["Sheet1"]
-    wb_1['K1']= 'EGR opening %'
-    wb_1['L1']= EGR_open_perc
+    # wb = openpyxl.load_workbook(excelFilePath)
+    # print(wb.sheetnames)
+    # wb_1 = wb["Sheet1"]
+    # wb_1['K1']= 'EGR opening %'
+    # wb_1['L1']= EGR_open_perc
     
-    wb.save(excelFilePath)
+    # wb.save(excelFilePath)

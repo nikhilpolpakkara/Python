@@ -107,6 +107,8 @@ if __name__ == "__main__":
                       'egr_T_exhaust_temperature', 'egr_T_oil_temperature',
                      # 'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
                       'egr_P_exhaustp','egr_P_intakep_min','egr_pct_req_flow',#'egr_P_intakep'
+                      'egr_kghr_egr_flow_req','egr_kghr_egr_flow_th','egr_kghr_intake_flow_act',
+                      'egr_P_deltap_cycle','egr_P_deltap_inst','egr_mm_Target_Pos','egr_mm_Current_Pos'
                       ]
         df = mdf.to_dataframe(
                 channels=impSignals,
@@ -167,7 +169,7 @@ if __name__ == "__main__":
         EGR_open_perc = (Time_EGR_open/(df['egr_b_operate_valve'].count()))*100
         print("EGR opening percentage in IDC - ",round(EGR_open_perc,1),'%')
         #binning by mean of exhaust pressure
-        binplotNOx = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
+        binplotNOx_Mean = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
                           df.NOx, rpmbins, exhTbins, 
                           title = "Mean NOx at RPM and exhaust temperature", 
                           method = "mean", scatterXlabel = "RPM[rpm]", 
@@ -179,7 +181,7 @@ if __name__ == "__main__":
         #binning of time spent at given RPM and exhaust temperature bins
         
         #Sum NOx
-        binplotNOx = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
+        binplotNOx_Total = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
                           df.NOx, rpmbins, exhTbins, 
                           title = "Total NOx at RPM and exhaust temperature", 
                           method = "sum", scatterXlabel = "RPM[rpm]", 
@@ -198,6 +200,24 @@ if __name__ == "__main__":
                              cmap = "YlGnBu")
         
         plt.savefig(os.path.join(graphFolderPath, baseName + "__binnedTime.png"), bbox_inches='tight')
+        
+        binplotEGR_flow_req = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
+                     df.egr_kghr_egr_flow_req, rpmbins, exhTbins, 
+                     title = "EGR flow req at RPM and exhaust temperature", 
+                     method = "mean", scatterXlabel = "RPM[rpm]", 
+                     scatterYlabel = "EGR flow required[kg/h]", 
+                     cmap = "YlGnBu")
+        
+        plt.savefig(os.path.join(graphFolderPath, baseName + "__binnedEGRflowreq.png"), bbox_inches='tight')
+        
+        binplot_EGR_flow_perc = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
+                     df.egr_pct_req_flow, rpmbins, exhTbins, 
+                     title = "% EGR flow req at RPM and exhaust temperature", 
+                     method = "mean", scatterXlabel = "RPM[rpm]", 
+                     scatterYlabel = "% EGR flow required[%]", 
+                     cmap = "YlGnBu")
+        
+        plt.savefig(os.path.join(graphFolderPath, baseName + "__binned%EGRflowreq.png"), bbox_inches='tight')
         
         n_i = list(range(1,len(df['egr_b_operate_valve'])+1))
         df['Sl.no'] = n_i
