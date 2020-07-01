@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import binned_statistic_2d 
+import openpyxl
 
 
 def graph(x):
@@ -103,12 +104,14 @@ if __name__ == "__main__":
             if not(("CCP" in signal) or ("_sword" in signal) or "$" in signal):
                 measuredSignals.append(signal)
         #creating an empty list of important signals
-        impSignals = ['cps_n_engine', 'egr_b_operate_valve', 
+        impSignals = ['cps_n_engine','egr_b_operate_valve',
+                      'egr_P_exhaustp',
                       'egr_T_exhaust_temperature', 'egr_T_oil_temperature',
-                     # 'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
-                      'egr_P_exhaustp','egr_P_intakep_min','egr_pct_req_flow',#'egr_P_intakep'
-                      'egr_kghr_egr_flow_req','egr_kghr_egr_flow_th','egr_kghr_intake_flow_act',
+                      #'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
+                      'egr_P_intakep','egr_P_intakep_min',
+                      'egr_kghr_egr_flow_req','egr_kghr_egr_flow_th','egr_kghr_intake_flow_act','egr_pct_req_flow',
                       'egr_P_deltap_cycle','egr_P_deltap_inst','egr_mm_Target_Pos','egr_mm_Current_Pos'
+                      # 'ENGINE_RPM','EXHAUST_TEMPERATURE','OIL_TEMPERATURE','EGR_VALVE_STATE'
                       ]
         df = mdf.to_dataframe(
                 channels=impSignals,
@@ -142,9 +145,9 @@ if __name__ == "__main__":
             #reduce the size of modal data to match that of INCA data
             dfModal = dfModal[len(dfModal) - len(df):]
         df['actualSpeed'] = dfModal['ActualSpeed (km/h)\n[km/h]'].values
-        df['NOx'] = dfModal['NOx_grams (Dil)\n[grams]'].values*1000
-        df['CO'] = dfModal['CO_grams (Dil)\n[grams]'].values*1000
-        df['THC'] = dfModal['THC_grams (Dil)\n[grams]'].values*1000
+        df['NOx'] = dfModal['NOx_grams (Dil)\n[grams]'].values#*1000
+        df['CO'] = dfModal['CO_grams (Dil)\n[grams]'].values#*1000
+        df['THC'] = dfModal['THC_grams (Dil)\n[grams]'].values#*1000
         shift = determineShift(df.egr_T_exhaust_temperature, df.actualSpeed)
         #determine the left shift of modal data
         print("Shift is %d" %shift)
@@ -191,16 +194,18 @@ if __name__ == "__main__":
         #removing all the nan values
         plt.savefig(os.path.join(graphFolderPath, baseName + "__binnedTotalNOx.png"), bbox_inches='tight')
         
-        
+       
         binplotTime = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
                              df.egr_P_exhaustp, rpmbins, exhTbins, 
                              title = "%Time spent at RPM and exhaust temperature", 
                              method = "count", scatterXlabel = "RPM[rpm]", 
                              scatterYlabel = "Exhaust Temperature[C]", 
                              cmap = "YlGnBu")
+
         
         plt.savefig(os.path.join(graphFolderPath, baseName + "__binnedTime.png"), bbox_inches='tight')
         
+        # """
         binplotEGR_flow_req = heatMap(df.cps_n_engine, df.egr_T_exhaust_temperature, 
                      df.egr_kghr_egr_flow_req, rpmbins, exhTbins, 
                      title = "EGR flow req at RPM and exhaust temperature", 
@@ -219,8 +224,18 @@ if __name__ == "__main__":
         
         plt.savefig(os.path.join(graphFolderPath, baseName + "__binned%EGRflowreq.png"), bbox_inches='tight')
         
-        n_i = list(range(1,len(df['egr_b_operate_valve'])+1))
-        df['Sl.no'] = n_i
-        df.set_index('Sl.no',inplace=True)
-#        index = pd.Index(range(0,len(df['egr_b_operate_valve'])+1))
-#        df = pd.DataFrame(df,index=index)
+        # """
+        with pd.ExcelWriter(excelFilePath, engine='openpyxl', mode='a') as writer:
+            binplotNOx_Mean.to_excel(writer,sheet_name='Mean NOx Binning')
+            binplotNOx_Total.to_excel(writer,sheet_name='Tot NOx Binning')
+            binplotTime.to_excel(writer,sheet_name='Time Binning')
+            # binplot_EGR_flow_perc.to_excel(writer,sheet_name='egr flow perc Binning')
+            # binplotEGR_flow_req.to_excel(writer,sheet_name='egr flow Binning')
+
+       
+        # n_i = list(range(1,len(df['egr_b_operate_valve'])+1))
+        # df['Sl.no'] = n_i
+        # df.set_index('Sl.no',inplace=True)
+        #index = pd.Index(range(0,len(df['egr_b_operate_valve'])+1))
+        #df = pd.DataFrame(df,index=index)
+

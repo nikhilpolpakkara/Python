@@ -23,8 +23,8 @@ datFiles = easygui.fileopenbox(msg='Select dat files', default='*.dat', multiple
 folderPath = os.path.dirname(datFiles[0])
 
 def Averaging_df(x,y):
-    # RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
-    RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
+    RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
+    # RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
     mean_ = []
     for i in RPM:
         df_i = x[(x['cps_n_engine'] > i-50) & (x['cps_n_engine'] < i+50)]
