@@ -105,7 +105,7 @@ if __name__ == "__main__":
                 measuredSignals.append(signal)
         #creating an empty list of important signals
         impSignals = ['cps_n_engine','egr_b_operate_valve',
-                      'egr_P_exhaustp',
+                      'egr_P_exhaustp','egr_P_deltap_cycle','egr_P_deltap_inst',
                       'egr_T_exhaust_temperature', 'egr_T_oil_temperature',
                       #'egr_T_limiting_temp_low', 'egr_T_limiting_temp_high',
                       'egr_P_intakep','egr_P_intakep_min',
@@ -145,9 +145,9 @@ if __name__ == "__main__":
             #reduce the size of modal data to match that of INCA data
             dfModal = dfModal[len(dfModal) - len(df):]
         df['actualSpeed'] = dfModal['ActualSpeed (km/h)\n[km/h]'].values
-        df['NOx'] = dfModal['NOx_grams (Dil)\n[grams]'].values#*1000
-        df['CO'] = dfModal['CO_grams (Dil)\n[grams]'].values#*1000
-        df['THC'] = dfModal['THC_grams (Dil)\n[grams]'].values#*1000
+        df['NOx'] = dfModal['NOx_grams (Dil)\n[grams]'].values*1000
+        df['CO'] = dfModal['CO_grams (Dil)\n[grams]'].values*1000
+        df['THC'] = dfModal['THC_grams (Dil)\n[grams]'].values*1000
         shift = determineShift(df.egr_T_exhaust_temperature, df.actualSpeed)
         #determine the left shift of modal data
         print("Shift is %d" %shift)

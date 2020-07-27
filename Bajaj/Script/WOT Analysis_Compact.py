@@ -23,8 +23,8 @@ datFiles = easygui.fileopenbox(msg='Select dat files', default='*.dat', multiple
 folderPath = os.path.dirname(datFiles[0])
 
 def Averaging_df(x,y):
-    RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
-    # RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
+    # RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
+    RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
     mean_ = []
     for i in RPM:
         df_i = x[(x['cps_n_engine'] > i-50) & (x['cps_n_engine'] < i+50)]
@@ -167,31 +167,7 @@ for datFile in datFiles:
     plt.grid(linestyle='dotted')
     plt.xlabel('RPM')
     plt.ylabel('kg/h')
-    plt.title('Fuel flow')
+    plt.title('Exhaust_temperature')
     plt.show()
     plt.savefig(os.path.join(graphFolderPath, baseName + "__Exhaust temp.png"), bbox_inches='tight')
     # print('Pressure @ 3200RPM :',df_Average['egr_P_exhaustp'][1])
-"""
-
-
-def power_():
-    RPM = [3200,3000,2800,2600,2400,2200,2000,1800,1600,1400,1200]
-    # RPM = [3150,2950,2750,2550,2350,2150,1950,1750,1550,1350,1150]
-    graph_ = df_Average.plot(x ='INCA engine speed (RPM)' , y ='Power (kW)' ,figsize=(10, 6),
-                    rot=90,xticks= RPM,kind = 'line',grid=True,marker='o')
-    for x,y in zip(RPM,df_Average['Power (kW)']):
-        graph_.annotate(str(y),xy=(x,y))
-    plt.grid(linestyle='dotted')
-    plt.xlabel('RPM')
-    plt.ylabel('mbar')
-    plt.title('Power')
-
-for df in dfs:
-    print(dfs[df]['Power (kW)'])
-    # ax1 =
-    dfs[df].plot(x ='INCA engine speed (RPM)' , y ='Power (kW)' ,figsize=(10, 6),
-                    rot=90,xticks= RPM,kind = 'line',grid=True,marker='o')
-for df in dfs:
-    dfs[df].(x='INCA engine speed (RPM)' , y ='Power (kW)',label=basename)
-    plt.plot()
-"""

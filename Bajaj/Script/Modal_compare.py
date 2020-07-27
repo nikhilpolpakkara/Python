@@ -26,6 +26,9 @@ for i in range(0,len(modalFilePath1)):
 
     lis.append(a)
 
+
+    
+
 def Subplot_NOx():    
     fig,ax = plt.subplots(2, 3)
     for i in range(0,len(modalFilePath1)):

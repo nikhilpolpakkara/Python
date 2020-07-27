@@ -162,7 +162,7 @@ for datFile in datFiles:
     plt.grid(linestyle='dotted')
     plt.xlabel('RPM')
     plt.ylabel('kg/h')
-    plt.title('Fuel flow')
+    plt.title('Exhaust temp')
     plt.show()
     plt.savefig(os.path.join(graphFolderPath, baseName + "__Exhaust temp.png"), bbox_inches='tight')
     

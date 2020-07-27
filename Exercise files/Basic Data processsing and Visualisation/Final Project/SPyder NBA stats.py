@@ -8,10 +8,17 @@ from datetime import datetime
 import collections
 from scipy.stats import rankdata
 
-path = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games_details.csv'
-path_2 = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games.csv'
+path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
+path_2 = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
 df_games = pd.read_csv(path)
 df_gms = pd.read_csv(path_2)
+
+nullvals = df_games.isnull().sum()
+nullvals.sum()
+
+nullvals.plot(kind='bar')
+
+df_games = df_games.fillna(0)
 
 condition = df_gms['SEASON'] > 2010
 df_gms_decade_2020 = df_gms[condition]
@@ -52,10 +59,11 @@ for i,j in DReb_rank.items():
             if i==x==a:
                 new_dict[i]=j+y+b
 new_rank = [(new_dict[p],p) for p in new_dict]
-new_rank.sort()
-new_rank
+new_rank=new_rank.sort()
+new_rank[0]
 
-
+for keys,values in new_dict:
+    
 #%%
 def dict_to_tup(dict_):
     list_tup =[(dict_[p],p) for p in dict_]
@@ -96,7 +104,7 @@ else:
     
 lis = list(range(0,len(df_gms_decade_2020['TEAM_ID_home'])))
 
-df_win_tm = [df_gms_decade_2020['TEAM_ID_home'] for  if df_gms_decade_2020['HOME_TEAM_WINS']>0]
+df_win_tm = [df_gms_decade_2020['TEAM_ID_home'] for if df_gms_decade_2020['HOME_TEAM_WINS']>0]
 
 condition_home_win = df_gms_decade_2020['HOME_TEAM_WINS'] >0
 condition_away_win = df_gms_decade_2020['HOME_TEAM_WINS'] == 0
@@ -106,14 +114,33 @@ df_a = df_gms_decade_2020[condition_away_win]
 df_win_team = {}
 for ind in df_gms_decade_2020.index:
     if df_gms_decade_2020['HOME_TEAM_WINS'][ind] >0:
-        df_win_team[df_gms_decade_2020['GAME_ID'][ind]] 
-        = df_gms_decade_2020['TEAM_ID_home'][ind]
+        df_win_team[df_gms_decade_2020['GAME_ID'][ind]] = df_gms_decade_2020['TEAM_ID_home'][ind]
     else:
-        df_win_team[df_gms_decade_2020['GAME_ID'][ind]] 
-        = df_gms_decade_2020['TEAM_ID_away'][ind]
+        df_win_team[df_gms_decade_2020['GAME_ID'][ind]] = df_gms_decade_2020['TEAM_ID_away'][ind]
  
 player_win = {}      
 for i in new_rank[:15]:
     for ind in df.index:
         player_team_id[]
-                    
+
+player_win = {}
+for i in range(0,5):                    
+    cond_1 = df_games['PLAYER_NAME'] == new_rank[i][1]
+    df_defensive_player = df_games[cond_1]
+
+    wins = 0
+    for ind in df_defensive_player.index:
+        for game,win_team in df_win_team.items():
+            if df_defensive_player['GAME_ID'][ind] == game:
+                if df_defensive_player['TEAM_ID'][ind] == win_team:
+                    wins = wins + 1
+    player_win[new_rank[i][1]] = wins
+
+new_df = pd.DataFrame(columns=['PLAYER_NAME', 'TOT_DREB', 'TOT_STL','TOT_BLK'])
+for rank,player in new_rank[:5]:
+    PL = df_games['PLAYER_NAME'] == player
+    df_player = df_games[PL]
+    new_df['PLAYER_NAME'] = player
+    new_df['TOT_DREB'] = df_player['DREB'].sum()
+    new_df['TOT_STL'] = df_player['STL'].sum()
+    new_df['TOT_BLK'] = df_player['BLK'].sum()
