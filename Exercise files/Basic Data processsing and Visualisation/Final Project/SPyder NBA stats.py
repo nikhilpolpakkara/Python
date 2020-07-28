@@ -8,8 +8,10 @@ from datetime import datetime
 import collections
 from scipy.stats import rankdata
 
-path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
-path_2 = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
+#path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
+path = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games_details.csv'
+#path_2 = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
+path_2 = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games.csv'
 df_games = pd.read_csv(path)
 df_gms = pd.read_csv(path_2)
 
@@ -59,10 +61,8 @@ for i,j in DReb_rank.items():
             if i==x==a:
                 new_dict[i]=j+y+b
 new_rank = [(new_dict[p],p) for p in new_dict]
-new_rank=new_rank.sort()
+new_rank.sort()
 new_rank[0]
-
-for keys,values in new_dict:
     
 #%%
 def dict_to_tup(dict_):
@@ -124,16 +124,14 @@ for i in new_rank[:15]:
         player_team_id[]
 
 player_win = {}
-for i in range(0,5):                    
-    cond_1 = df_games['PLAYER_NAME'] == new_rank[i][1]
-    df_defensive_player = df_games[cond_1]
+for i in range(0,16):                    
+    cond_1 = df['PLAYER_NAME'] == new_rank[i][1]
+    df_defensive_player = df[cond_1]
 
     wins = 0
     for ind in df_defensive_player.index:
-        for game,win_team in df_win_team.items():
-            if df_defensive_player['GAME_ID'][ind] == game:
-                if df_defensive_player['TEAM_ID'][ind] == win_team:
-                    wins = wins + 1
+        if df_defensive_player['TEAM_ID'][ind] == df_defensive_player['WIN_TEAM_ID'][ind]:
+            wins = wins + 1
     player_win[new_rank[i][1]] = wins
 
 new_df = pd.DataFrame(columns=['PLAYER_NAME', 'TOT_DREB', 'TOT_STL','TOT_BLK'])
@@ -144,3 +142,13 @@ for rank,player in new_rank[:5]:
     new_df['TOT_DREB'] = df_player['DREB'].sum()
     new_df['TOT_STL'] = df_player['STL'].sum()
     new_df['TOT_BLK'] = df_player['BLK'].sum()
+#%%
+#to add winning team to data frame
+for ind in df.index:
+    for game,win_team in df_win_team.items():
+        if df['GAME_ID'][ind] == game:
+            df['WIN_TEAM_ID'] = win_team
+            
+df['WIN_TEAM_ID'] = df['GAME_ID'].map(df_win_team)
+df[14564]
+
