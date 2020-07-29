@@ -43,7 +43,8 @@ Pts_rank = Rank(df,'PTS')
 Ast_rank = Rank(df,'AST')
 Stl_rank = Rank(df,'STL')
 Blk_rank = Rank(df,'BLK')
-
+FG_pct_rank = Rank(df,'FG_PCT')
+FG3_pct_rank = Rank(df,'FG3_PCT')
 #%%
 stl_blk = {}
 for x,y in Blk_rank.items():
@@ -150,5 +151,24 @@ for ind in df.index:
             df['WIN_TEAM_ID'] = win_team
             
 df['WIN_TEAM_ID'] = df['GAME_ID'].map(df_win_team)
-df[14564]
 
+#%%
+#Offensive player
+Offensive_dict = {}
+for i,j in FG3_pct_rank.items():
+    for x,y in Pts_rank.items():
+        for a,b in FG_pct_rank.items():
+            if i==x==a:
+                Offensive_dict[i]=j+y+b
+Offensive_rank = [(Offensive_dict[p],p) for p in Offensive_dict]
+Offensive_rank.sort()
+
+
+cond_3 = df['PTS']>=30
+df_thirty_plus_gms = df[cond_3]
+
+
+
+thirty_plus_gms = df_thirty_plus_gms['PLAYER_NAME'].value_counts()
+
+df_pts = df.groupby(['PLAYER_NAME'])['PTS'].sum()
