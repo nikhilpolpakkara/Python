@@ -8,10 +8,10 @@ from datetime import datetime
 import collections
 from scipy.stats import rankdata
 
-#path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
-path = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games_details.csv'
-#path_2 = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
-path_2 = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games.csv'
+path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
+# path = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games_details.csv'
+path_2 = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
+# path_2 = 'M:\Git repository\Python\Exercise files\Basic Data processsing and Visualisation\Final Project\Dataset\games.csv'
 df_games = pd.read_csv(path)
 df_gms = pd.read_csv(path_2)
 
@@ -64,7 +64,18 @@ for i,j in DReb_rank.items():
 new_rank = [(new_dict[p],p) for p in new_dict]
 new_rank.sort()
 new_rank[0]
-    
+
+def ranking_dict(v1,v2,v3):
+    new_dict = {}
+    for i,j in v1.items():
+        for x,y in v2.items():
+            for a,b in v3.items():
+                if i==x==a:
+                    new_dict[i]=j+y+b
+    new_rank = [(new_dict[p],p) for p in new_dict]
+    new_rank.sort()
+    return new_rank
+
 #%%
 def dict_to_tup(dict_):
     list_tup =[(dict_[p],p) for p in dict_]
@@ -119,11 +130,6 @@ for ind in df_gms_decade_2020.index:
     else:
         df_win_team[df_gms_decade_2020['GAME_ID'][ind]] = df_gms_decade_2020['TEAM_ID_away'][ind]
  
-player_win = {}      
-for i in new_rank[:15]:
-    for ind in df.index:
-        player_team_id[]
-
 player_win = {}
 for i in range(0,16):                    
     cond_1 = df['PLAYER_NAME'] == new_rank[i][1]
@@ -143,6 +149,20 @@ for rank,player in new_rank[:5]:
     new_df['TOT_DREB'] = df_player['DREB'].sum()
     new_df['TOT_STL'] = df_player['STL'].sum()
     new_df['TOT_BLK'] = df_player['BLK'].sum()
+#%%
+# Player win
+def NO_of_win(rank,df_):
+    player_win = {}
+    for i in range(0,16):                    
+        cond_1 = df_['PLAYER_NAME'] == rank[i][1]
+        df_player_win = df_[cond_1]
+    
+        wins = 0
+        for ind in df_player_win.index:
+            if df_player_win['TEAM_ID'][ind] == df_player_win['WIN_TEAM_ID'][ind]:
+                wins = wins + 1
+        player_win[rank[i][1]] = wins
+    return player_win
 #%%
 #to add winning team to data frame
 for ind in df.index:
@@ -167,8 +187,37 @@ Offensive_rank.sort()
 cond_3 = df['PTS']>=30
 df_thirty_plus_gms = df[cond_3]
 
-
-
 thirty_plus_gms = df_thirty_plus_gms['PLAYER_NAME'].value_counts()
 
-df_pts = df.groupby(['PLAYER_NAME'])['PTS'].sum()
+
+defensive_list = ranking_dict(DReb_rank,Blk_rank,Stl_rank)
+offenive_list = ranking_dict(FG3_pct_rank,Pts_rank,FG_pct_rank)
+offensive_list2 = ranking_dict(thirty_plus_rank,Pts_rank,FG_pct_rank)
+thirty_plus_rank = {}
+a=1
+for i in  thirty_plus_gms.index:
+    thirty_plus_rank[i] = a
+    a = a+1
+    
+
+#%%
+df_Ofensive_beast = pd.DataFrame(columns=['PLAYER_NAME', 'TOT_30_PLUS_GAMES', 'TOT_PTS','FG_PCT'])
+pl_nme = []
+tot_30_plus_games = []
+tot_pts = []
+tot_fg_pct = []
+for rank,player in offensive_list2[:5]:
+    PL = df['PLAYER_NAME'] == player
+    df_player = df[PL]
+    pl_nme.append(player)
+    tot_pts.append(int(df_player['PTS'].sum()))
+    tot_fg_pct.append(round(df_player['FG_PCT'].mean(),3))
+    for i in thirty_plus_gms.index:
+        if i == player:
+            tot_30_plus_games.append(thirty_plus_gms[i])
+df_Ofensive_beast['PLAYER_NAME'] = pl_nme
+df_Ofensive_beast['TOT_30_PLUS_GAMES'] = tot_30_plus_games
+df_Ofensive_beast['FG_PCT'] = tot_fg_pct
+df_Ofensive_beast['TOT_PTS'] = tot_pts
+
+df_Ofensive_beast.set_index('PLAYER_NAME')
