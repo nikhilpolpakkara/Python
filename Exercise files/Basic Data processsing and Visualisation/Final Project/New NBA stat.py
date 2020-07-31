@@ -37,6 +37,14 @@ nullvals = df_games1.isnull().sum()
 condition = df_gms['SEASON'] > 2010
 df_gms_decade_2020 = df_gms[condition]
 
+df_win_team = {}
+for ind in df_gms.index:
+    if df_gms['HOME_TEAM_WINS'][ind] >0:
+        df_win_team[df_gms['GAME_ID'][ind]] = df_gms['TEAM_ID_home'][ind]
+    else:
+        df_win_team[df_gms['GAME_ID'][ind]] = df_gms['TEAM_ID_away'][ind]
+df_games1['WIN_TEAM_ID'] = df_games1['GAME_ID'].map(df_win_team)
+
 #%%
 df = df_games1[df_games1['GAME_ID'].isin(df_gms_decade_2020['GAME_ID'])]
 def Rank(df_,x):
@@ -68,13 +76,6 @@ def dict_to_tup(dict_):
     return list_tup.sort()
 
 def NO_of_win(rank,df_,df2):
-    df_win_team = {}
-    for ind in df2.index:
-        if df2['HOME_TEAM_WINS'][ind] >0:
-            df_win_team[df2['GAME_ID'][ind]] = df2['TEAM_ID_home'][ind]
-        else:
-            df_win_team[df2['GAME_ID'][ind]] = df2['TEAM_ID_away'][ind]
-    df_['WIN_TEAM_ID'] = df_['GAME_ID'].map(df_win_team)
     player_win = {}
     for i in range(0,16):                    
         cond_1 = df_['PLAYER_NAME'] == rank[i][1]
@@ -144,5 +145,96 @@ fig3.set_ylabel('Blocks')
 player_wins = NO_of_win(defensive_list,df,df_gms_decade_2020)
 df_Defensive_beast['TOT_WINS'] = df_Defensive_beast['PLAYER_NAME'].map(player_wins)
 df_Defensive_beast
+#%%
+top_10_Reb = list(n for n,i in Reb_rank.items())[:10]
+top_10_Pts = list(n for n,i in Pts_rank.items())[:10]
+top_10_ast = list(n for n,i in Ast_rank.items())[:10]
+top_10_Stl = list(n for n,i in Stl_rank.items())[:10]
+top_10_Blk = list(n for n,i in Blk_rank.items())[:10]
+df_Best_player = pd.DataFrame(columns=['REB rank', 'PTS rank', 'STL rank','BLK rank','AST rank'])
+df_Best_player['REB rank'] = top_10_Reb
+df_Best_player['PTS rank'] = top_10_Pts
+df_Best_player['STL rank'] = top_10_ast
+df_Best_player['BLK rank'] = top_10_Stl
+df_Best_player['AST rank'] = top_10_Blk
 
+z = ranking_dict(Reb_rank,Pts_rank,Ast_rank,Stl_rank,Blk_rank)
+
+#%%
+def ranking_dict(v1,v2,v3,v4,v5):
+    new_dict = {}
+    for i,j in v1.items():
+        for x,y in v2.items():
+            for a,b in v3.items():
+                for g,f in v4.items():
+                    for k,l in v5.items():
+                        if i==x==a==g==k:
+                            new_dict[i]=j+y+b+f+l
+    new_rank = [(new_dict[p],p) for p in new_dict]
+    new_rank.sort()
+    return new_rank
+#%%
+#  Player efficiency i- ((PTS + REB + AST + STL + BLK − Missed FG − Missed FT - TO) / GP)
+pl_nme = []
+tot_dreb_e = []
+tot_pts_e = []
+tot_stl_e = []
+tot_blk_e = []
+tot_ast_e = []
+tot_missed_fg_e = []
+tot_missed_ft_e = []
+tot_TO = []
+for rank,player in defensive_list[:5]:
+    PL = df['PLAYER_NAME'] == player
+    df_player = df[PL]
+    pl_nme_e.append(player)
+    tot_dreb_e.append(df_player['DREB'].sum())
+    tot_stl_e.append(df_player['STL'].sum())
+    tot_blk_e.append(df_player['BLK'].sum())
+    tot_ast_e.append(df_player['AST'].sum())
     
+for i in z:
+    if df['PLAYER_NAME'] = i[1]:
+        PL_e = df['PLAYER_NAME'] == player
+        df_playe_e = df[PL_e]
+        tot_pts_e.append(df_player['PTS'].sum())
+        tot_dreb_e.append(df_player['DREB'].sum())
+        tot_stl_e.append(df_player['STL'].sum())
+        tot_blk_e.append(df_player['BLK'].sum())
+        tot_ast_e.append(df_player['AST'].sum())
+        tot_missed_fg_e.append(df_player['FGA'].sum()-df_player['FGM'].sum())
+        tot_missed_ft_e.append(df_player['FTA'].sum()-df_player['FTM'].sum())
+        tot_TO.append(df_player['PTS'].sum())
+
+
+cc=list(df_games1['MIN'][100])
+
+time_list = []
+
+for ind in cc:
+    if type(ind) == str:
+        try:
+            pt = datetime.strptime(ind,'%M:%S')
+            total_seconds = pt.second + pt.minute*60
+            time_list.append(total_seconds)
+        except:
+            print('warning')
+    else:
+        time_list.append(ind)
+
+df_games1['TIME_PLAYED']= time_list    
+
+
+word = 'bad:00'
+
+word[:-3].strip()
+
+for ind in df_games1.index:
+    if df_games1['MIN'][ind] == str:
+        if len(df_games1['MIN'][ind])>5:
+            df_games1['MIN'][ind] = df_games1['MIN'][ind][:-3].strip()
+
+
+
+
+
