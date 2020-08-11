@@ -18,10 +18,10 @@ import collections
 from scipy.stats import rankdata
 
 
-path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
-#path = 'M:/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
-path_2 = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
-#path_2 = 'M:/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
+#path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
+path = 'M:/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
+#path_2 = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
+path_2 = 'M:/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games.csv'
 df_games1 = pd.read_csv(path)
 df_gms = pd.read_csv(path_2)
 df_gms.head()
@@ -175,7 +175,7 @@ def ranking_dict(v1,v2,v3,v4,v5):
     return new_rank
 #%%
 #  Player efficiency i- ((PTS + REB + AST + STL + BLK − Missed FG − Missed FT - TO) / GP)
-pl_nme = []
+pl_nme_e = []
 tot_dreb_e = []
 tot_pts_e = []
 tot_stl_e = []
@@ -193,32 +193,30 @@ for rank,player in defensive_list[:5]:
     tot_blk_e.append(df_player['BLK'].sum())
     tot_ast_e.append(df_player['AST'].sum())
     
-for i in z:
-    if df['PLAYER_NAME'] = i[1]:
-        PL_e = df['PLAYER_NAME'] == player
-        df_playe_e = df[PL_e]
-        tot_pts_e.append(df_player['PTS'].sum())
-        tot_dreb_e.append(df_player['DREB'].sum())
-        tot_stl_e.append(df_player['STL'].sum())
-        tot_blk_e.append(df_player['BLK'].sum())
-        tot_ast_e.append(df_player['AST'].sum())
-        tot_missed_fg_e.append(df_player['FGA'].sum()-df_player['FGM'].sum())
-        tot_missed_ft_e.append(df_player['FTA'].sum()-df_player['FTM'].sum())
-        tot_TO.append(df_player['PTS'].sum())
+for i,player in z:
+    PL_e = df['PLAYER_NAME'] == player
+    df_player = df[PL_e]
+    pl_nme_e.append(player)
+    tot_pts_e.append(df_player['PTS'].sum())
+    tot_dreb_e.append(df_player['DREB'].sum())
+    tot_stl_e.append(df_player['STL'].sum())
+    tot_blk_e.append(df_player['BLK'].sum())
+    tot_ast_e.append(df_player['AST'].sum())
+    tot_missed_fg_e.append(df_player['FGA'].sum()-df_player['FGM'].sum())
+    tot_missed_ft_e.append(df_player['FTA'].sum()-df_player['FTM'].sum())
+    tot_TO.append(df_player['PTS'].sum())
 
 
-cc=list(df_games1['MIN'][100])
+cc=list(df_games1['MIN'])
 
 time_list = []
 
 for ind in cc:
     if type(ind) == str:
-        try:
-            pt = datetime.strptime(ind,'%M:%S')
-            total_seconds = pt.second + pt.minute*60
-            time_list.append(total_seconds)
-        except:
-            print('warning')
+        pt = datetime.strptime(ind,'%M:%S')
+        total_seconds = pt.second + pt.minute*60
+        time_list.append(total_seconds)
+
     else:
         time_list.append(ind)
 
@@ -229,12 +227,58 @@ word = 'bad:00'
 
 word[:-3].strip()
 
-for ind in df_games1.index:
-    if df_games1['MIN'][ind] == str:
+for ind in df_games1.index:   
+    if df_games1['MIN'][ind] == int:
+        df_games1['MIN'][ind] = df_games1['MIN'][ind].replace("60","59")
         if len(df_games1['MIN'][ind])>5:
-            df_games1['MIN'][ind] = df_games1['MIN'][ind][:-3].strip()
+            df_games1['MIN'][ind] = df_games1['MIN'][ind][:-3].str.strip()
 
+df_games1['MIN'] = df_games1['MIN'].str.strip("-")
+df_games1['MIN'] = df_games1['MIN'].str.replace("60","59")
+df_games1['MIN'] = df_games1['MIN'].str.replace("78","58")
+df_games1['MIN'] = df_games1['MIN'].str.cat("00","")
+for ind in df_games1['MIN'].index:   
+    if df_games1['MIN'][ind] == int:
+        print(df_games1['MIN'][ind])
+df_games1['MINS'] = pd.Series()
+for ind in df_games1.index:
+    if isinstance(df_games1['MIN'][ind],int):
+        df_games1['MINS'][ind] = "00:00:00"
+    else:  
+        if isinstance(df_games1['MIN'][ind],str):
+            if len(df_games1['MIN'][ind])>5:
+                df_games1['MINS'][ind] = df_games1['MIN'][ind]
+            else:
+                if len(df_games1['MIN'][ind])<3:
+                    df_games1['MINS'][ind]= df_games1['MIN'][ind].astype(str)+":00:00"
+                else:
+                    if len(df_games1['MIN'][ind])<6:
+                        df_games1['MINS'][ind]= df_games1['MIN'][ind].astype(str)+":00"
 
+            
+for ind in df_games1.index:
+    if isinstance(df_games1['MIN'][ind],str):
+        if len(df_games1['MIN'][ind])<3:
+            df_games1['MINS'][ind]= df_games1['MIN'][ind]+":00:00"
 
-
-
+for i in range(0,20):#len(df_games1):
+    print(df_games1.loc[i]['MIN'])
+for i in range(0,len(df_games1)):
+    if isinstance(df_games1.loc[i]['MIN'],str):
+        if len(df_games1.loc[i]['MIN'])<3:
+            df_games1.loc[i]['MINS']= df_games1.loc[i]['MIN']
+            
+if isinstance(df_games1['MIN'],int):
+    df_games1['MINS'].str.cat("00:00:00")
+else:  
+    if isinstance(df_games1['MIN'],str):
+        if len(df_games1['MIN'])>5:
+            df_games1['MINS'] = df_games1['MIN']
+        else:
+            if len(df_games1['MIN'])<3:
+                df_games1['MINS']= df_games1['MIN'].astype(str)+":00:00"
+            else:
+                if len(df_games1['MIN'])<6:
+                    df_games1['MINS']= df_games1['MIN']+":00"
+cond_less_3 = len(df_games1['MIN']) < 3
+df_
