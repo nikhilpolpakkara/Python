@@ -64,7 +64,7 @@ def Rank(df_,x):
     ff = dict(zip(Tot_rebound_.keys(), rankdata([-i for i in Tot_rebound_.values()], method='min')))
     rank = [(ff[p],p) for p in ff]
     rank.sort()
-    rank = rank[:100]
+    rank = rank[:50]
     
     rank_dict = {}
     for i in rank:
@@ -158,10 +158,10 @@ df_Best_player['STL rank'] = top_10_ast
 df_Best_player['BLK rank'] = top_10_Stl
 df_Best_player['AST rank'] = top_10_Blk
 
-z = ranking_dict(Reb_rank,Pts_rank,Ast_rank,Stl_rank,Blk_rank)
+z = new_ranking_dict(Reb_rank,Pts_rank,Ast_rank,Stl_rank,Blk_rank)
 
 #%%
-def ranking_dict(v1,v2,v3,v4,v5):
+def new_ranking_dict(v1,v2,v3,v4,v5):
     new_dict = {}
     for i,j in v1.items():
         for x,y in v2.items():
@@ -257,9 +257,8 @@ for ind in df_games1.index:
 
             
 for ind in df_games1.index:
-    if isinstance(df_games1['MIN'][ind],str):
-        if len(df_games1['MIN'][ind])<3:
-            df_games1['MINS'][ind]= df_games1['MIN'][ind]+":00:00"
+    if isinstance(df_games1['MIN'][ind],int):
+        df_games1['MINS'][ind]= "00:00:00"
 
 for i in range(0,20):#len(df_games1):
     print(df_games1.loc[i]['MIN'])
@@ -281,4 +280,8 @@ else:
                 if len(df_games1['MIN'])<6:
                     df_games1['MINS']= df_games1['MIN']+":00"
 cond_less_3 = len(df_games1['MIN']) < 3
-df_
+df_games1['MIN'] = df_games1['MIN'].map(str)
+df_games1.loc[df_games1['MIN']=='0','MINS'] = '00:00:00'
+df_games1['MINS']= df_games1['MIN'].astype(str)+":00:00"
+df_games1.loc[len(df_games1['MIN'])>8,'MINSS'] = 'TRUE'
+df_games1.loc[len(df_games1['MIN'])<=8,'MINSS'] = 'False'
