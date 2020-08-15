@@ -16,7 +16,7 @@ import seaborn as sns
 from math import pi
 import collections
 from scipy.stats import rankdata
-
+import time
 
 #path = 'D:/NIKHIL/ANACONDA PYTHON/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
 path = 'M:/Git repository/Python/Exercise files/Basic Data processsing and Visualisation/Final Project/Dataset/games_details.csv'
@@ -34,9 +34,20 @@ plt.title('Missing data')
 df_games1 = df_games1.fillna(0)
 nullvals = df_games1.isnull().sum()
 
+df_games1['MINS'] = df_games1['MIN']
+zero_integer = (df_games1['MIN'] == 0)
+df_games1.loc[zero_integer,'MIN'] = '00:00'
+double_digit = df_games1['MIN'].str.len()==2
+df_games1.loc[double_digit,'MIN'] = df_games1['MIN'].astype(str)+':00'
+df_games1.loc[df_games1.index,'MIN'] = df_games1['MIN'].str.replace("60","59")
+single_digit = df_games1['MIN'].str.len() ==1
+df_games1.loc[single_digit,'MIN'] = '0'+df_games1['MIN'].astype(str)+':00'
+df_games1.loc[df_games1.index,'MIN'] = df_games1['MIN'].str.replace("-","")
+
 condition = df_gms['SEASON'] > 2010
 df_gms_decade_2020 = df_gms[condition]
-
+#%%
+                        #Winning team 
 df_win_team = {}
 for ind in df_gms.index:
     if df_gms['HOME_TEAM_WINS'][ind] >0:
@@ -44,6 +55,22 @@ for ind in df_gms.index:
     else:
         df_win_team[df_gms['GAME_ID'][ind]] = df_gms['TEAM_ID_away'][ind]
 df_games1['WIN_TEAM_ID'] = df_games1['GAME_ID'].map(df_win_team)
+#%%
+                        #Seconds Played by each player
+cc=list(df_games1['MIN'])
+time_list = []
+
+for ind in cc:
+    try:
+        pt = datetime.strptime(ind,'%M:%S')
+        total_seconds = pt.second + pt.minute*60
+        time_list.append(total_seconds)
+    except:
+        time_list.append(0)
+        k = df_games1.loc[df_games1['MIN'] == ind ].index[0]
+        print(df_games1['PLAYER_NAME'][k],'-',ind)
+
+df_games1['TIME_PLAYED']= time_list   
 
 #%%
 df = df_games1[df_games1['GAME_ID'].isin(df_gms_decade_2020['GAME_ID'])]
@@ -77,7 +104,7 @@ def dict_to_tup(dict_):
 
 def NO_of_win(rank,df_,df2):
     player_win = {}
-    for i in range(0,16):                    
+    for i in range(0,len(rank)):                    
         cond_1 = df_['PLAYER_NAME'] == rank[i][1]
         df_player_win = df_[cond_1]
     
@@ -95,6 +122,18 @@ def ranking_dict(v1,v2,v3):
             for a,b in v3.items():
                 if i==x==a:
                     new_dict[i]=j+y+b
+    new_rank = [(new_dict[p],p) for p in new_dict]
+    new_rank.sort()
+    return new_rank
+def new_ranking_dict(v1,v2,v3,v4,v5):
+    new_dict = {}
+    for i,j in v1.items():
+        for x,y in v2.items():
+            for a,b in v3.items():
+                for g,f in v4.items():
+                    for k,l in v5.items():
+                        if i==x==a==g==k:
+                            new_dict[i]=j+y+b+f+l
     new_rank = [(new_dict[p],p) for p in new_dict]
     new_rank.sort()
     return new_rank
@@ -151,12 +190,12 @@ top_10_Pts = list(n for n,i in Pts_rank.items())[:10]
 top_10_ast = list(n for n,i in Ast_rank.items())[:10]
 top_10_Stl = list(n for n,i in Stl_rank.items())[:10]
 top_10_Blk = list(n for n,i in Blk_rank.items())[:10]
-df_Best_player = pd.DataFrame(columns=['REB rank', 'PTS rank', 'STL rank','BLK rank','AST rank'])
-df_Best_player['REB rank'] = top_10_Reb
-df_Best_player['PTS rank'] = top_10_Pts
-df_Best_player['STL rank'] = top_10_ast
-df_Best_player['BLK rank'] = top_10_Stl
-df_Best_player['AST rank'] = top_10_Blk
+df_TOP_player = pd.DataFrame(columns=['REB rank', 'PTS rank', 'STL rank','BLK rank','AST rank'])
+df_TOP_player['REB rank'] = top_10_Reb
+df_TOP_player['PTS rank'] = top_10_Pts
+df_TOP_player['STL rank'] = top_10_ast
+df_TOP_player['BLK rank'] = top_10_Stl
+df_TOP_player['AST rank'] = top_10_Blk
 
 z = new_ranking_dict(Reb_rank,Pts_rank,Ast_rank,Stl_rank,Blk_rank)
 
@@ -175,6 +214,9 @@ def new_ranking_dict(v1,v2,v3,v4,v5):
     return new_rank
 #%%
 #  Player efficiency i- ((PTS + REB + AST + STL + BLK − Missed FG − Missed FT - TO) / GP)
+game_time = datetime.strptime('48:00','%M:%S')
+gt = game_time.second + game_time.minute*60
+
 pl_nme_e = []
 tot_dreb_e = []
 tot_pts_e = []
@@ -184,14 +226,7 @@ tot_ast_e = []
 tot_missed_fg_e = []
 tot_missed_ft_e = []
 tot_TO = []
-for rank,player in defensive_list[:5]:
-    PL = df['PLAYER_NAME'] == player
-    df_player = df[PL]
-    pl_nme_e.append(player)
-    tot_dreb_e.append(df_player['DREB'].sum())
-    tot_stl_e.append(df_player['STL'].sum())
-    tot_blk_e.append(df_player['BLK'].sum())
-    tot_ast_e.append(df_player['AST'].sum())
+tot_MTS = []
     
 for i,player in z:
     PL_e = df['PLAYER_NAME'] == player
@@ -204,84 +239,45 @@ for i,player in z:
     tot_ast_e.append(df_player['AST'].sum())
     tot_missed_fg_e.append(df_player['FGA'].sum()-df_player['FGM'].sum())
     tot_missed_ft_e.append(df_player['FTA'].sum()-df_player['FTM'].sum())
-    tot_TO.append(df_player['PTS'].sum())
+    tot_TO.append(df_player['TO'].sum())
+#    time_played = df_player['TIME_PLAYED'].sum()
+#    tot_MTS.append(round(time_played/gt))
+    GP = 0
+    for ind in df_player.index:
+        if df_player['TIME_PLAYED'][ind]>0:
+            GP+=1
+    tot_MTS.append(GP)
+    
+df_Best_player = pd.DataFrame(columns=['PLAYER_NAME','REB', 'PTS', 'STL','BLK','AST','M_FG','M_FT','TO','GP','P_EFF'])
+df_Best_player['PLAYER_NAME'] = pl_nme_e
+df_Best_player['REB'] = tot_dreb_e
+df_Best_player['PTS'] = tot_pts_e
+df_Best_player['STL'] = tot_stl_e
+df_Best_player['BLK'] = tot_blk_e
+df_Best_player['AST'] = tot_ast_e
+df_Best_player['M_FG'] = tot_missed_fg_e
+df_Best_player['M_FT'] = tot_missed_ft_e
+df_Best_player['TO'] = tot_TO
+df_Best_player['GP'] = tot_MTS
+df_Best_player['P_EFF'] =   (df_Best_player['REB']+
+                            df_Best_player['PTS']+
+                            df_Best_player['STL']+
+                            df_Best_player['BLK']+
+                            df_Best_player['AST']-
+                            df_Best_player['M_FG']-
+                            df_Best_player['M_FT']-
+                            df_Best_player['TO'])/df_Best_player['GP']
+                            
+#%%
+#df_Best_player = df_Best_player.reset_index('PLAYER_NAME')
+categories = list(df_Best_player)[1:3]
+values = df_Best_player.values.tolist()
+values += values[:1]
+angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
+angles += angles[:1]
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 8),
+                       subplot_kw=dict(polar=True))
+ax.plot(angles, values, linewidth=1, linestyle='solid')
+ax.fill(angles, values, 'skyblue', alpha=0.4)
 
-
-cc=list(df_games1['MIN'])
-
-time_list = []
-
-for ind in cc:
-    if type(ind) == str:
-        pt = datetime.strptime(ind,'%M:%S')
-        total_seconds = pt.second + pt.minute*60
-        time_list.append(total_seconds)
-
-    else:
-        time_list.append(ind)
-
-df_games1['TIME_PLAYED']= time_list    
-
-
-word = 'bad:00'
-
-word[:-3].strip()
-
-for ind in df_games1.index:   
-    if df_games1['MIN'][ind] == int:
-        df_games1['MIN'][ind] = df_games1['MIN'][ind].replace("60","59")
-        if len(df_games1['MIN'][ind])>5:
-            df_games1['MIN'][ind] = df_games1['MIN'][ind][:-3].str.strip()
-
-df_games1['MIN'] = df_games1['MIN'].str.strip("-")
-df_games1['MIN'] = df_games1['MIN'].str.replace("60","59")
-df_games1['MIN'] = df_games1['MIN'].str.replace("78","58")
-df_games1['MIN'] = df_games1['MIN'].str.cat("00","")
-for ind in df_games1['MIN'].index:   
-    if df_games1['MIN'][ind] == int:
-        print(df_games1['MIN'][ind])
-df_games1['MINS'] = pd.Series()
-for ind in df_games1.index:
-    if isinstance(df_games1['MIN'][ind],int):
-        df_games1['MINS'][ind] = "00:00:00"
-    else:  
-        if isinstance(df_games1['MIN'][ind],str):
-            if len(df_games1['MIN'][ind])>5:
-                df_games1['MINS'][ind] = df_games1['MIN'][ind]
-            else:
-                if len(df_games1['MIN'][ind])<3:
-                    df_games1['MINS'][ind]= df_games1['MIN'][ind].astype(str)+":00:00"
-                else:
-                    if len(df_games1['MIN'][ind])<6:
-                        df_games1['MINS'][ind]= df_games1['MIN'][ind].astype(str)+":00"
-
-            
-for ind in df_games1.index:
-    if isinstance(df_games1['MIN'][ind],int):
-        df_games1['MINS'][ind]= "00:00:00"
-
-for i in range(0,20):#len(df_games1):
-    print(df_games1.loc[i]['MIN'])
-for i in range(0,len(df_games1)):
-    if isinstance(df_games1.loc[i]['MIN'],str):
-        if len(df_games1.loc[i]['MIN'])<3:
-            df_games1.loc[i]['MINS']= df_games1.loc[i]['MIN']
-            
-if isinstance(df_games1['MIN'],int):
-    df_games1['MINS'].str.cat("00:00:00")
-else:  
-    if isinstance(df_games1['MIN'],str):
-        if len(df_games1['MIN'])>5:
-            df_games1['MINS'] = df_games1['MIN']
-        else:
-            if len(df_games1['MIN'])<3:
-                df_games1['MINS']= df_games1['MIN'].astype(str)+":00:00"
-            else:
-                if len(df_games1['MIN'])<6:
-                    df_games1['MINS']= df_games1['MIN']+":00"
-cond_less_3 = len(df_games1['MIN']) < 3
-df_games1['MIN'] = df_games1['MIN'].map(str)
-df_games1.loc[df_games1['MIN']=='0','MINS'] = '00:00:00'
-df_games1['MINS']= df_games1['MIN'].astype(str)+":00:00"
-df_games1.loc[len(df_games1['MIN'])>8,'MINSS'] = 'TRUE'
-df_games1.loc[len(df_games1['MIN'])<=8,'MINSS'] = 'False'
+plt.show()
