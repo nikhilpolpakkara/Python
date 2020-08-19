@@ -44,8 +44,7 @@ single_digit = df_games1['MIN'].str.len() ==1
 df_games1.loc[single_digit,'MIN'] = '0'+df_games1['MIN'].astype(str)+':00'
 df_games1.loc[df_games1.index,'MIN'] = df_games1['MIN'].str.replace("-","")
 
-condition = df_gms['SEASON'] > 2010
-df_gms_decade_2020 = df_gms[condition]
+
 #%%
                         #Winning team 
 df_win_team = {}
@@ -73,6 +72,8 @@ for ind in cc:
 df_games1['TIME_PLAYED']= time_list   
 
 #%%
+condition = df_gms['SEASON'] > 2010
+df_gms_decade_2020 = df_gms[condition]
 df = df_games1[df_games1['GAME_ID'].isin(df_gms_decade_2020['GAME_ID'])]
 def Rank(df_,x):
     df = df_
@@ -185,6 +186,52 @@ player_wins = NO_of_win(defensive_list,df,df_gms_decade_2020)
 df_Defensive_beast['TOT_WINS'] = df_Defensive_beast['PLAYER_NAME'].map(player_wins)
 df_Defensive_beast
 #%%
+                        #Offensive beast
+cond_3 = df['PTS']>=30
+df_thirty_plus_gms = df[cond_3]
+thirty_plus_gms = df_thirty_plus_gms['PLAYER_NAME'].value_counts()
+
+thirty_plus_rank = {}
+a=1
+for i in  thirty_plus_gms.index:
+    thirty_plus_rank[i] = a
+    a = a+1
+
+offensive_list = ranking_dict(thirty_plus_rank,Pts_rank,FG_pct_rank)
+offensive_list[:5]
+
+df_Ofensive_beast = pd.DataFrame(columns=['PLAYER_NAME', '30_PLUS_GAMES', 'TOT_PTS','FG_PCT'])
+pl_nme = []
+tot_30_plus_games = []
+tot_pts = []
+tot_fg_pct = []
+for rank,player in offensive_list[:5]:
+    PL = df['PLAYER_NAME'] == player
+    df_player = df[PL]
+    pl_nme.append(player)
+    tot_pts.append(int(df_player['PTS'].sum()))
+    tot_fg_pct.append(round(df_player['FG_PCT'].mean(),3))
+    for i in thirty_plus_gms.index:
+        if i == player:
+            tot_30_plus_games.append(thirty_plus_gms[i])
+df_Ofensive_beast['PLAYER_NAME'] = pl_nme
+df_Ofensive_beast['30_PLUS_GAMES'] = tot_30_plus_games
+df_Ofensive_beast['FG_PCT'] = tot_fg_pct
+df_Ofensive_beast['TOT_PTS'] = tot_pts
+df_Ofensive_beast.set_index('PLAYER_NAME')
+
+fig,ax = plt.subplots(1,3) 
+fig1 = df_Ofensive_beast['30_PLUS_GAMES'].plot(kind='bar',ax=ax[0],title='30 plus games',figsize=(15, 5))
+fig1.set_ylabel('Number of 30+ games')
+fig2 = df_Ofensive_beast['TOT_PTS'].plot(kind='bar',ax=ax[1],title='Points',figsize=(15, 5))
+fig2.set_ylabel('Points')
+fig3 = df_Ofensive_beast['FG_PCT'].plot(kind='bar',ax=ax[2],title='Field goal %',figsize=(15, 5))
+fig3.set_ylabel('Field goal %')
+
+player_win = NO_of_win(offensive_list,df,df_gms_decade_2020)
+df_Ofensive_beast['TOT_WINS'] = df_Ofensive_beast['PLAYER_NAME'].map(player_win)
+df_Ofensive_beast.set_index('PLAYER_NAME')
+#%%
 top_10_Reb = list(n for n,i in Reb_rank.items())[:10]
 top_10_Pts = list(n for n,i in Pts_rank.items())[:10]
 top_10_ast = list(n for n,i in Ast_rank.items())[:10]
@@ -197,21 +244,8 @@ df_TOP_player['STL rank'] = top_10_ast
 df_TOP_player['BLK rank'] = top_10_Stl
 df_TOP_player['AST rank'] = top_10_Blk
 
-z = new_ranking_dict(Reb_rank,Pts_rank,Ast_rank,Stl_rank,Blk_rank)
+Best_Player = new_ranking_dict(Reb_rank,Pts_rank,Ast_rank,Stl_rank,Blk_rank)
 
-#%%
-def new_ranking_dict(v1,v2,v3,v4,v5):
-    new_dict = {}
-    for i,j in v1.items():
-        for x,y in v2.items():
-            for a,b in v3.items():
-                for g,f in v4.items():
-                    for k,l in v5.items():
-                        if i==x==a==g==k:
-                            new_dict[i]=j+y+b+f+l
-    new_rank = [(new_dict[p],p) for p in new_dict]
-    new_rank.sort()
-    return new_rank
 #%%
 #  Player efficiency i- ((PTS + REB + AST + STL + BLK − Missed FG − Missed FT - TO) / GP)
 game_time = datetime.strptime('48:00','%M:%S')
@@ -227,8 +261,12 @@ tot_missed_fg_e = []
 tot_missed_ft_e = []
 tot_TO = []
 tot_MTS = []
+tot_fg_pct = []
+tot_fg3_pct = []
+tot_ft_pct = []
+
     
-for i,player in z:
+for i,player in Best_Player:
     PL_e = df['PLAYER_NAME'] == player
     df_player = df[PL_e]
     pl_nme_e.append(player)
@@ -240,6 +278,9 @@ for i,player in z:
     tot_missed_fg_e.append(df_player['FGA'].sum()-df_player['FGM'].sum())
     tot_missed_ft_e.append(df_player['FTA'].sum()-df_player['FTM'].sum())
     tot_TO.append(df_player['TO'].sum())
+    tot_fg_pct.append(round(df_player['FG_PCT'].mean(),1))
+    tot_fg3_pct.append(round(df_player['FG3_PCT'].mean(),1))
+    tot_ft_pct.append(round(df_player['FT_PCT'].mean(),1))
 #    time_played = df_player['TIME_PLAYED'].sum()
 #    tot_MTS.append(round(time_played/gt))
     GP = 0
@@ -258,26 +299,83 @@ df_Best_player['AST'] = tot_ast_e
 df_Best_player['M_FG'] = tot_missed_fg_e
 df_Best_player['M_FT'] = tot_missed_ft_e
 df_Best_player['TO'] = tot_TO
+df_Best_player['FG_PCT'] = tot_fg_pct
+df_Best_player['FG3_PCT'] = tot_fg3_pct
+df_Best_player['FT_PCT'] = tot_ft_pct
 df_Best_player['GP'] = tot_MTS
-df_Best_player['P_EFF'] =   (df_Best_player['REB']+
+df_Best_player['P_EFF'] =   round((df_Best_player['REB']+
                             df_Best_player['PTS']+
                             df_Best_player['STL']+
                             df_Best_player['BLK']+
                             df_Best_player['AST']-
                             df_Best_player['M_FG']-
                             df_Best_player['M_FT']-
-                            df_Best_player['TO'])/df_Best_player['GP']
-                            
+                            df_Best_player['TO'])/df_Best_player['GP'],2)
+df_Best_player1 = df_Best_player.set_index('PLAYER_NAME')
+df_Best_player1['P_EFF'] 
+
+player_wins = NO_of_win(Best_Player,df,df_gms_decade_2020)
+df_Best_player['TOT_WINS'] = df_Best_player['PLAYER_NAME'].map(player_wins)
+df_Best_player['WIN_PCT'] =  round((df_Best_player['TOT_WINS']/df_Best_player['GP'])*100 ,1)        
 #%%
 #df_Best_player = df_Best_player.reset_index('PLAYER_NAME')
-categories = list(df_Best_player)[1:3]
-values = df_Best_player.values.tolist()
-values += values[:1]
+categories = list(df_Best_player)[11:14]
+N = len(categories)
+
 angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
 angles += angles[:1]
-fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 8),
-                       subplot_kw=dict(polar=True))
-ax.plot(angles, values, linewidth=1, linestyle='solid')
-ax.fill(angles, values, 'skyblue', alpha=0.4)
+plt.figure(figsize=(20,6))
+ax = plt.subplot(111, polar=True)
+plt.xticks(angles[:-1], categories, color='grey', size=15)
+plt.yticks([0.25,0.5,0.75,1], ["25%","50%","75%","100%"], color="grey", size=15)
+plt.ylim(0,1)
+ax.set_rlabel_position(0)
 
-plt.show()
+values = df_Best_player.loc[0].drop('PLAYER_NAME').values.flatten().tolist()
+values = values[10:13]
+values += values[:1]
+
+ax.plot(angles, values, linewidth=1, linestyle='solid',label = "Lebron")
+ax.fill(angles, values, 'b', alpha=0.1)
+
+values = df_Best_player.loc[1].drop('PLAYER_NAME').values.flatten().tolist()
+values = values[10:13]
+values += values[:1]
+
+ax.plot(angles, values, linewidth=1, linestyle='solid',label = "Durant")
+ax.fill(angles, values, 'r', alpha=0.1)
+
+values = df_Best_player.loc[2].drop('PLAYER_NAME').values.flatten().tolist()
+values = values[10:13]
+values += values[:1]
+
+ax.plot(angles, values, linewidth=1, linestyle='solid',label = "Giannis")
+ax.fill(angles, values, 'y', alpha=0.1)
+plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1)) 
+
+#%%
+                    #Radar plot
+def radar_plot(df,a,legend):
+    categories = list(df)[11:14]
+    N = len(categories)
+    
+    values = df_Best_player.loc[a].drop('PLAYER_NAME').values.flatten().tolist()
+    values = values[10:13]
+    values += values[:1]
+    
+    angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
+    angles += angles[:1]
+    plt.figure(figsize=(20,6))
+    ax = plt.subplot(111, polar=True)
+    plt.xticks(angles[:-1], categories, color='grey', size=15)
+    plt.yticks([0.25,0.5,0.75,1], ["25%","50%","75%","100%"], color="grey", size=15)
+    plt.ylim(0,1)
+    ax.set_rlabel_position(0)
+    ax.plot(angles, values, linewidth=1, linestyle='solid',label=legend)
+    ax.fill(angles, values,alpha=0.1)
+    
+    plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))                    
+
+radar_plot(df_Best_player,0,"Lebron")
+radar_plot(df_Best_player,1,"Durant")
+radar_plot(df_Best_player,2,"Giannis")
