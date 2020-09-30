@@ -62,5 +62,65 @@ df = pd.DataFrame({'xData':x, 'yData':y})
 plots = sns.regplot('xData', 'yData', data=df,)
 plt.show(plots)
 #%%
-x= np.linspace(0,10,0.1)
-y
+# Import the required packages
+import matplotlib.pyplot as plt
+import numpy as np
+# Generate the data
+x = np.arange(0, 10, 0.2)
+y = np.sin(x)
+z = np.cos(x)
+# Generate the figure and the axes
+fig, axs = plt.subplots(nrows=2, ncols=1)
+# On the first axis, plot the sine and label the ordinate
+axs[0].plot(x,y)
+axs[0].set_ylabel('Sine')
+# On the second axis, plot the cosine
+axs[1].plot(x,z)
+axs[1].set_ylabel('Cosine')
+# Display the resulting plot
+fig.show()
+#%%
+#KDE Plot
+import statistics
+x =np.random.randn(100)
+sns.kdeplot(x,bw=1)
+sd=statistics.stdev(x)
+n=len(x)
+
+"""
+It can be shown that under certain conditions the optimal choice for h is
+h = 1.06*S.D*(n)^(-1/5)
+"""
+h = 1.06*sd*(n**(-0.2)) # h=0.36789080560138004
+sns.kdeplot(x,bw=h)
+#%%
+# imports specific to the plots in this example
+import numpy as np
+from matplotlib import cm
+from mpl_toolkits.mplot3d.axes3d import get_test_data
+# Twice as wide as it is tall.
+fig = plt.figure(figsize=plt.figaspect(0.5))
+#---- First subplot
+# Note that the declaration "projection='3d'"
+# is required for 3d plots!
+ax = fig.add_subplot(1, 2, 1, projection='3d')
+# Generate the grid
+X = np.arange(-5, 5, 0.1)
+Y = np.arange(-5, 5, 0.1)
+X, Y = np.meshgrid(X, Y)
+# Generate the surface data
+R = np.sqrt(X**2 + Y**2)
+Z = np.sin(R)
+# Plot the surface
+surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
+cmap=cm.GnBu, linewidth=0, antialiased=False)
+ax.set_zlim3d(-1.01, 1.01)
+fig.colorbar(surf, shrink=0.5, aspect=10)
+#---- Second subplot
+ax = fig.add_subplot(1, 2, 2, projection='3d')
+X, Y, Z = get_test_data(0.05)
+ax.plot_wireframe(X, Y, Z, rstride=10, cstride=10)
+outfile = '3dGraph.png'
+plt.savefig(outfile, dpi=200)
+print('Image saved to {0}'.format(outfile))
+plt.show()
